@@ -1,0 +1,459 @@
+---
+title: "How Does a Bike-Share Navigate Speedy Success?"
+author: "Bryan Zhou"
+date: "9/16/2021"
+output: html_document
+---
+```{r}
+
+```
+
+## Scenario
+
+Cyclistic, a bike sharing company launched in Chicago, 2016. The company has a fleet of 5,824 bicycles that are geotracked and locked into a network of 692 stations. Customers can unlocked and returned a bicycle to any station. The company offers customers several pricing plans: single-ride passes, full-day passes, and annual memberships.  Lily Moreno, the marketing manager and the analyst team have determined that the future growth of the company will be converting the casual riders to annual members. The company will need a new marketing strategy to increase the number of annual membership. 
+
+## Ask
+
+How do annual members and causal riders use Cyclistic bikes differently?
+
+
+## Prepare
+
+Data must satisfied these criteria: **ROCCC**
+
+* **R**eliable
+* **O**riginal
+* **C**omprehensive
+* **C**urrent
+* **C**ite
+
+The data consist of a series of divvy trips from the year 2013-2021 in zip file. The year 2020 is used for this analysis and the name of the files are change for readablility. The data are processed using R instead of Excel, because it is too large for Excel to handle.  The data contain many NA.
+The data are obtained from this source: click here [link] (https://divvy-tripdata.s3.amazonaws.com/index.html)
+
+The Motivate International Inc. ("Motivate") has made their Divvy bicycle sharing service data public. click here for more info [link] (https://www.divvybikes.com/data-license-agreement)
+
+
+## Process
+ 
+Setup the working directory. 
+
+```{r setup, inclue =FALSE, echo =FALSE}
+
+getwd()
+knitr::opts_knit$set(root.dir = "C:/Divvy_Trips_2020")
+
+```
+
+Load the necessary R packages.
+
+```{r load tidyverse and lubridate }
+
+library(tidyverse)
+library(lubridate)
+
+```
+
+Load the 12 months Divvy Trips 2020 csv files as a tibble, because these files are too large. 
+The read_csv() import the data as a tibble and read.csv() import the data as a regular data frame. 
+
+```{r csv files, include = FALSE, echo = FALSE }
+
+divvyTrips_Q1_2020 <- read_csv("Divvy_Trips_2020_Q1.csv")
+divvyTrips_April_2020 <- read_csv("Divvy_Trips_2020_04.csv")
+divvyTrips_May_2020 <- read_csv("Divvy_Trips_2020_05.csv")
+divvyTrips_June_2020 <- read_csv("Divvy_Trips_2020_06.csv")
+divvyTrips_July_2020 <- read_csv("Divvy_Trips_2020_07.csv")
+divvyTrips_Aug_2020  <- read_csv("Divvy_Trips_2020_08.csv")
+divvyTrips_Sept_2020 <- read_csv("Divvy_Trips_2020_09.csv")
+divvyTrips_Oct_2020 <- read_csv("Divvy_Trips_2020_10.csv")
+divvyTrips_Nov_2020 <- read_csv("Divvy_Trips_2020_11.csv")
+divvyTrips_Dec_2020 <- read_csv("Divvy_Trips_2020_12.csv")
+
+```
+
+### Wrangle And Merge Data
+
+Look at the data frame structures and find common fields.
+
+```{r column names, include = FALSE, echo = FALSE}
+
+colnames(divvyTrips_Q1_2020)
+colnames(divvyTrips_April_2020)
+colnames(divvyTrips_May_2020)
+colnames(divvyTrips_June_2020)
+colnames(divvyTrips_July_2020)
+colnames(divvyTrips_Aug_2020)
+colnames(divvyTrips_Sept_2020)
+colnames(divvyTrips_Oct_2020)
+colnames(divvyTrips_Nov_2020)
+colnames(divvyTrips_Dec_2020)
+
+```
+
+Inspect the datasets internal structures.
+
+```{r data frame structure, include = FALSE, echo = FALSE}
+
+
+str(divvyTrips_Q1_2020)
+str(divvyTrips_April_2020)
+str(divvyTrips_May_2020)
+str(divvyTrips_June_2020)
+str(divvyTrips_July_2020)
+str(divvyTrips_Aug_2020)
+str(divvyTrips_Sept_2020)
+str(divvyTrips_Oct_2020)
+str(divvyTrips_Nov_2020)
+str(divvyTrips_Dec_2020)
+
+```
+
+Determine if any of data frame have NA.
+
+```{r Find NA, include = FALSE, echo = FALSE}
+
+is.na(divvyTrips_Q1_2020)
+is.na(divvyTrips_April_2020)
+is.na(divvyTrips_May_2020)
+is.na(divvyTrips_June_2020)
+is.na(divvyTrips_July_2020)
+is.na(divvyTrips_Aug_2020)
+is.na(divvyTrips_Sept_2020)
+is.na(divvyTrips_Oct_2020)
+is.na(divvyTrips_Nov_2020)
+is.na(divvyTrips_Dec_2020)
+
+
+```
+
+
+ Some of the datasets contain many NA values, which will be dealt with in the later process. According to the information gain from str() function, the divvyTrips_Dec_2020 data is the only one with character values for start_station_id and end_station_id columns. R does not allow  merging datasets with inconsistent column names, data type, or length. Prepare to convert the other data to match divvyTrips_Dec_2020.
+ 
+```{r mutate function}
+divvyTrips_Q1_2020 <- mutate(divvyTrips_Q1_2020, "start_station_id"= as.character("start_station_id")
+                  ,"end_station_id" = as.character("end_station_id"))
+
+divvyTrips_April_2020 <- mutate(divvyTrips_April_2020, "start_station_id"= as.character("start_station_id")
+                  ,"end_station_id" = as.character("end_station_id"))
+
+divvyTrips_May_2020 <- mutate(divvyTrips_May_2020, "start_station_id"= as.character("start_station_id")
+                  ,"end_station_id" = as.character("end_station_id"))
+
+divvyTrips_June_2020 <- mutate(divvyTrips_June_2020, "start_station_id"= as.character("start_station_id")
+                  ,"end_station_id" = as.character("end_station_id"))
+
+divvyTrips_July_2020 <- mutate(divvyTrips_July_2020 , "start_station_id"= as.character("start_station_id")
+                  ,"end_station_id" = as.character("end_station_id"))
+
+divvyTrips_Aug_2020 <- mutate(divvyTrips_Aug_2020, "start_station_id"= as.character("start_station_id")
+                  ,"end_station_id" = as.character("end_station_id"))
+
+divvyTrips_Sept_2020 <- mutate(divvyTrips_Sept_2020, "start_station_id"= as.character("start_station_id")
+                  ,"end_station_id" = as.character("end_station_id"))
+
+divvyTrips_Oct_2020 <- mutate(divvyTrips_Oct_2020 , "start_station_id"= as.character("start_station_id")
+                  ,"end_station_id" = as.character("end_station_id"))
+
+divvyTrips_Nov_2020 <- mutate(divvyTrips_Nov_2020, "start_station_id"= as.character("start_station_id")
+                  ,"end_station_id" = as.character("end_station_id"))
+
+
+```
+
+### Merge
+
+Merge all the data into one data frame.
+
+```{r bind rows}
+
+all_trips <- bind_rows(divvyTrips_Q1_2020, divvyTrips_April_2020, divvyTrips_May_2020, divvyTrips_June_2020, divvyTrips_July_2020, divvyTrips_Aug_2020, divvyTrips_Sept_2020, divvyTrips_Oct_2020, divvyTrips_Nov_2020, divvyTrips_Dec_2020)
+
+```
+
+When inspecting the data frame with View() function, the Merge process resulted in a data frame with incorrect values. The start_station_id and end_station_id columns have their NA values replaced with their respective column names. This will only cause confusion in the later analysis.  Applied the mutate() function to change those  values back to NA.
+
+```{r revert the field values back to NA start station id}
+
+all_trips <- all_trips %>% mutate(start_station_id = replace(start_station_id, start_station_id =="start_station_id", NA))
+```
+
+
+```{r revert the field values back to NA for end station id}
+ all_trips <- all_trips %>% mutate(end_station_id = replace(end_station_id, end_station_id =="end_station_id", NA))
+```
+
+
+```{r dimension data frame}
+
+dim(all_trips)
+
+```
+
+### More Data Wrangling
+
+
+Now, it is time to fill in NA of start station id, end station id with their respective station names  using the fill() function.  Filter out any columns that can not be used to match the values.
+
+```{r arrange start station}
+
+all_trips_v2 <-all_trips %>% arrange(start_station_name, start_station_id, end_station_name, end_station_id, .by_group = TRUE)  
+
+
+```
+
+
+```{r filter out multiple columns with NA}
+
+all_trips_v2 <- all_trips_v2 %>% filter(!is.na(all_trips_v2$start_station_name), !is.na(all_trips_v2$end_station_name))
+
+```
+
+
+```{r fill in the NA for start stations }
+
+all_trips_v2 <- all_trips_v2 %>% fill(start_station_id,  .direction = "downup")
+```
+
+
+```{r fill in the NA for end stations}
+
+
+all_trips_v2 <- all_trips_v2 %>%  arrange(end_station_name, end_station_id, .by_group = TRUE) %>%  fill(end_station_id,  .direction = "downup")
+```
+
+
+Remove the latitude and longitude fields from the data frame.
+
+```{r Delete fields}
+
+all_trips_v3 <- all_trips_v2 %>% select(-c(start_lat, start_lng, end_lat, end_lng))
+
+```
+
+Inspect the new data frame 
+
+```{r column names again}
+colnames(all_trips_v3)
+```
+
+
+```{r column rows}
+nrow(all_trips_v3)
+```
+
+
+```{r dimension}
+
+dim(all_trips_v3)
+```
+
+
+```{r structure dataframe}
+str(all_trips_v3)
+```
+
+
+```{r  new Summary}
+summary(all_trips_v3)
+```
+
+Check member_casual column. There should be only two categories: member and casual.
+Level" is a special property of a column that is retained even if a subset does not contain any values from a specific level.
+
+```{r table}
+
+ table(all_trips_v3$member_casual)
+
+```
+
+Add more fields: day, month, year for more data aggregation and analysis.
+The default format is yyyy-mm-dd for the date.
+Add a ride_length field to calculate all trips in seconds.
+
+```{r Date}
+
+ all_trips_v3$date <-as.Date(all_trips_v3$started_at)
+ all_trips_v3$month <-format(as.Date(all_trips_v3$date), "%m")
+ all_trips_v3$day <-format(as.Date(all_trips_v3$date), "%d")
+ all_trips_v3$year <-format(as.Date(all_trips_v3$date), "%Y")
+ all_trips_v3$day_of_week <-format(as.Date(all_trips_v3$date), "%A")
+ all_trips_v3$ride_length <- difftime(all_trips_v3$ended_at ,all_trips_v3$started_at)
+
+```
+
+Inspect the new data frame structure.
+
+```{r structure}
+
+str(all_trips_v3)
+
+```
+
+Convert "ride_length" from Factor to numeric so we can run calculations on the data.
+
+```{r ride_length numeric}
+
+ is.factor(all_trips_v3$ride_length)
+ all_trips_v3$ride_length <-as.numeric(as.character(all_trips_v3$ride_length))
+ is.numeric(all_trips_v3$ride_length)
+
+```
+ 
+ Remove negative values and create a new data frame.
+
+ 
+```{r remove negative values and summary}
+
+ all_trips_v4 <- all_trips_v3[!(all_trips_v3$start_station_name == "HQ QR" | all_trips_v3$ride_length < 0),]
+ 
+
+```
+
+## Analyze
+
+```{r summary of data frame}
+
+summary(all_trips_v4)
+```
+
+### Descriptive Analysis
+
+```{r summary of ride length}
+
+summary(all_trips_v4$ride_length)
+```
+
+
+
+Compare the casual and member rider.
+
+```{r aggregate}
+
+ aggregate(all_trips_v4$ride_length ~ all_trips_v4$member_casual, FUN = mean)
+ aggregate(all_trips_v4$ride_length ~ all_trips_v4$member_casual, FUN = median)
+ aggregate(all_trips_v4$ride_length ~ all_trips_v4$member_casual, FUN = max)
+ aggregate(all_trips_v4$ride_length ~ all_trips_v4$member_casual, FUN = min)
+ 
+```
+
+Casual rider have longest ride duration.
+Find the average ride time by each day for member and casual user.
+
+```{r average ride time}
+
+ aggregate(all_trips_v4$ride_length ~ all_trips_v4$member_casual + all_trips_v4$day_of_week, FUN = mean)
+
+```
+
+Fix the days of the week, because they are out of order.
+
+```{r days of the week}
+
+ all_trips_v4$day_of_week <- ordered(all_trips_v4$day_of_week, levels=c("Sunday", "Monday",
+                                                                        "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"))
+```
+
+Repeat the average ride time by each day for member and causal user.
+Analyze ridership data by type and weekday; create weekday field using wday(); group by user type and weekday. 
+Calculate the number of rides and average calculates; calculate the average duration and sort the result.
+
+```{r average ride time in ordered}
+
+aggregate(all_trips_v4$ride_length ~ all_trips_v4$member_casual + all_trips_v4$day_of_week, FUN = mean)
+
+```
+
+
+```{r average ride time and analyze ridership data}
+
+aggregate(all_trips_v4$ride_length ~ all_trips_v4$member_casual + all_trips_v4$day_of_week, FUN = mean)
+all_trips_v4 %>% mutate(weekday = wday(started_at, label = TRUE)) %>% group_by(member_casual,weekday) %>% summarise(number_of_rides = n(),average_duration = mean(ride_length)) %>% 
+         arrange(member_casual, weekday)
+
+
+```
+
+## Share
+
+```{r visualize the number of rides by rider type}
+
+ all_trips_v4 %>% mutate(weekday = wday(started_at, label = TRUE)) %>% group_by(member_casual, weekday) %>%
+         summarise(number_of_rides = n()
+         ,average_duration = mean(ride_length)) %>%
+         arrange(member_casual, weekday) %>%
+         ggplot(aes(x = weekday, y = number_of_rides, fill = member_casual)) +
+         geom_col(position = "dodge") + ggtitle("The Number of Rides per Weekday by Rider Type, 2020") + theme(plot.title = element_text(hjust = 0.5)) 
+
+```
+
+
+```{r average duration of all trips}
+
+all_trips_v4 %>%
+         mutate(weekday = wday(started_at, label = TRUE)) %>%
+         group_by(member_casual, weekday) %>%
+         summarise(number_of_rides = n()
+                   ,average_duration = mean(ride_length)) %>%
+         arrange(member_casual, weekday) %>%
+         ggplot(aes(x = weekday, y = average_duration, fill = member_casual)) +
+         geom_col(position = "dodge") + ggtitle("The Average Duration of All Trips, 2020") + theme(plot.title = element_text(hjust = 0.5))
+ 
+
+```
+
+
+```{r bike preference among rider type}
+
+ggplot(data=all_trips_v4) +geom_bar(mapping = aes(x=rideable_type, fill = member_casual), position = "dodge") + ggtitle("Bike Preferences Among Riders Type, 2020") + theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+
+```{r the number of rider by rider_type, month}
+
+all_trips_v4 %>% mutate(month = month(started_at, label = TRUE)) %>% group_by(member_casual, month) %>%
+  summarise(number_of_rides = n()
+            ,average_duration = mean(ride_length)) %>%
+  arrange(member_casual, month) %>%
+  ggplot(aes(x = month, y = number_of_rides, fill = member_casual)) +
+  geom_col(position = "dodge") +ggtitle("The Number of Rides per Month By Rider Type, 2020") + theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+
+```{r average duration of all trips per month}
+
+ all_trips_v4 %>%
+         mutate(month = month(started_at, label = TRUE)) %>%
+         group_by(member_casual, month) %>%
+         summarise(number_of_rides = n()
+                   ,average_duration = mean(ride_length)) %>%
+         arrange(member_casual, month) %>%
+         ggplot(aes(x = month, y = average_duration, fill = member_casual)) +
+         geom_col(position = "dodge") +ggtitle ("The Average Duration of All Trips per Month, 2020") + theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+Create csv files for future analysis.
+
+```{r csv file}
+
+ counts <- aggregate(all_trips_v4$ride_length ~ all_trips_v4$member_casual +
+                             all_trips_v4$day_of_week, FUN = mean)
+ write.csv(counts,file ="C:/Divvy_Trips_2020/avg_ride_length.csv")
+ write.csv(all_trips_v4, file ="C:/Divvy_Trips_2020/all_trips_2020.csv", row.names = FALSE)
+
+```
+
+## Act
+
+###Conclusion
+
+Casual riders have the longest ride duration overall especially in the months of January
+and February.  Casual riders are most active during the weekends and during the summers. Both member and casual rider have strong preference for docked bike.
+                 
+### Recommendation
+
+     * Ask riders to take survey to gain more insight into their preferences.
+     * Use marketing ads to target casual riders during the weekends and summers.
+     * Create a promotional video and host it on youtube, other afflilate sites, and social media.
