@@ -192,7 +192,7 @@ dim(all_trips)
 ### More Data Wrangling
 
 
-Now, it is time to fill in NA of start station id, end station id with their respective station names  using the fill() function.  Filter out any columns that can not be used to match the values.
+Fill in the missing values for start station id, start station name, end station id  and end station name with their respective values using the fill() function. Arrange the selected columns and then  filter out any columns that can not be used to match the values.  The 'fill' is used to complete the missing values.
 
 ```{r arrange start station}
 
@@ -230,25 +230,28 @@ all_trips_v3 <- all_trips_v2 %>% select(-c(start_lat, start_lng, end_lat, end_ln
 
 ```
 
-Inspect the new data frame 
+Inspect columns of  the new data frame 
 
 ```{r column names again}
 colnames(all_trips_v3)
 ```
 
+Inspect the number of rows in the new data frame.
 
 ```{r column rows}
 nrow(all_trips_v3)
 ```
 
+Inspect the dimension of the new data frame.
 
 ```{r dimension}
 
 dim(all_trips_v3)
 ```
-
+Inspect the structure of the new data frame.
 
 ```{r structure dataframe}
+
 str(all_trips_v3)
 ```
 
@@ -311,12 +314,18 @@ Convert "ride_length" from Factor to numeric so we can run calculations on the d
 
 ## Analyze
 
+
+The statistical summary of the new data frame.
+
 ```{r summary of data frame}
 
 summary(all_trips_v4)
 ```
 
 ### Descriptive Analysis
+
+
+The statistical summary of ride length.
 
 ```{r summary of ride length}
 
@@ -364,6 +373,8 @@ aggregate(all_trips_v4$ride_length ~ all_trips_v4$member_casual + all_trips_v4$d
 ```
 
 
+
+
 ```{r average ride time and analyze ridership data}
 
 aggregate(all_trips_v4$ride_length ~ all_trips_v4$member_casual + all_trips_v4$day_of_week, FUN = mean)
@@ -374,6 +385,8 @@ all_trips_v4 %>% mutate(weekday = wday(started_at, label = TRUE)) %>% group_by(m
 ```
 
 ## Share
+
+Visualize the number of rides by rider type.
 
 ```{r visualize the number of rides by rider type}
 
@@ -386,6 +399,7 @@ all_trips_v4 %>% mutate(weekday = wday(started_at, label = TRUE)) %>% group_by(m
 
 ```
 
+The average duration of all trips.
 
 ```{r average duration of all trips}
 
@@ -402,12 +416,16 @@ all_trips_v4 %>%
 ```
 
 
+Bike preference among rider type.
+
+
 ```{r bike preference among rider type}
 
 ggplot(data=all_trips_v4) +geom_bar(mapping = aes(x=rideable_type, fill = member_casual), position = "dodge") + ggtitle("Bike Preferences Among Riders Type, 2020") + theme(plot.title = element_text(hjust = 0.5))
 
 ```
 
+The number of rider by rider_type per month.
 
 ```{r the number of rider by rider_type, month}
 
@@ -419,6 +437,8 @@ all_trips_v4 %>% mutate(month = month(started_at, label = TRUE)) %>% group_by(me
   geom_col(position = "dodge") +ggtitle("The Number of Rides per Month By Rider Type, 2020") + theme(plot.title = element_text(hjust = 0.5))
 
 ```
+
+Visualize the average duration of all trips per month.
 
 
 ```{r average duration of all trips per month}
@@ -447,13 +467,13 @@ Create csv files for future analysis.
 
 ## Act
 
-###Conclusion
+### Conclusion
 
 Casual riders have the longest ride duration overall especially in the months of January
 and February.  Casual riders are most active during the weekends and during the summers. Both member and casual rider have strong preference for docked bike.
                  
 ### Recommendation
 
-     * Ask riders to take survey to gain more insight into their preferences.
+     * Ask riders to take a survey and hand out discounts.
      * Use marketing ads to target casual riders during the weekends and summers.
-     * Create a promotional video and host it on youtube, other afflilate sites, and social media.
+     * Create a promotional video and host it on social media or other affiliate sites.
